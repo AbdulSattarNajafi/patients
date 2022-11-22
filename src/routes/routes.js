@@ -6,12 +6,18 @@ import Companies from "./../screens/Companies";
 import Patients from "./../screens/Patients";
 import Story from "./../screens/Story";
 import Contact from "./../screens/Contact";
+import Settings from "../screens/Settings";
 
 const routes = [
   {
     path: "/",
-    name: "Login",
-    component: Login,
+    name: "home",
+    component: Home,
+  },
+  {
+    path: "*",
+    name: "home",
+    component: Home,
   },
   {
     path: "login",
@@ -52,6 +58,11 @@ const routes = [
     path: "contact",
     name: "Contact",
     component: Contact,
+  },
+  {
+    path: "settings",
+    name: "Settings",
+    component: Settings,
   },
 ];
 

@@ -9,6 +9,7 @@ const LoginRegister = ({
   description,
   children,
   page,
+  onSubmit,
 }) => {
   return (
     <div className='relative h-screen flex flex-col'>
@@ -52,7 +53,9 @@ const LoginRegister = ({
             {description}
           </p>
 
-          <form className='w-full mt-9'>{children}</form>
+          <form onSubmit={onSubmit} className='w-full mt-9'>
+            {children}
+          </form>
         </div>
         <div className='hidden lg:block lg:w-2/5 xl:w-1/2'></div>
       </div>
