@@ -6,7 +6,7 @@ const Input = ({
   type,
   placeholder,
   required,
-  onChange,
+  inputRef,
 }) => {
   return (
     <div className='w-full flex flex-col mb-6'>
@@ -23,7 +23,8 @@ const Input = ({
         type={type}
         id={id}
         placeholder={placeholder}
-        onChange={onChange}
+        // onChange={onChange}
+        ref={inputRef}
       />
     </div>
   );
