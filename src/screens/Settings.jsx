@@ -1,13 +1,20 @@
-import React from "react";
+import React from 'react';
+import { useParams } from 'react-router-dom';
 
-import Theme from "../theme";
+import { useAuth } from '../hooks';
 
 const Settings = () => {
-  return (
-    <Theme>
-      <p>Account Settings</p>
-    </Theme>
-  );
+    const useId = useParams();
+    const authCtx = useAuth();
+
+    console.log(authCtx.token);
+
+    console.log(useId);
+    return (
+        <>
+            <p>Account Settings</p>
+        </>
+    );
 };
 
 export default Settings;
