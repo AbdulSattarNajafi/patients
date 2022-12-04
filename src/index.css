@@ -18,11 +18,15 @@
 }
 
 .btn {
-  @apply rounded-full py-2 px-4 text-base text-white font-semibold uppercase leading-5 border transition duration-200 md:py-3 md:px-6;
+  @apply rounded-full py-2 px-6 text-sm text-white font-semibold uppercase leading-5 border transition duration-200 lg:py-3 lg:text-base;
 }
 
 .btn-primary {
-  @apply bg-primaryBtn  shadow-primary-btn-shadow border-primaryBtn  hover:bg-primaryBtnHover hover:border-primaryBtnHover;
+  @apply bg-primaryBtn shadow-primary-btn-shadow border-primaryBtn  hover:bg-primaryBtnHover hover:border-primaryBtnHover;
+}
+
+.btn-primary-outline {
+  @apply bg-transparent text-primaryBtn border-primaryBtn hover:bg-primaryBtn hover:text-white;
 }
 
 .btn-secondary {
