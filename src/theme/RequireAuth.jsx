@@ -5,11 +5,7 @@ const RequireAuth = () => {
     const authCtx = useAuth();
     const location = useLocation();
 
-    return authCtx.isLoggedIn ? (
-        <Outlet />
-    ) : (
-        <Navigate to='home' state={{ from: location }} replace />
-    );
+    return authCtx.isLoggedIn ? <Outlet /> : <Navigate to='/' state={{ from: location }} replace />;
 };
 
 export default RequireAuth;

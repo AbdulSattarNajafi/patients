@@ -6,3 +6,8 @@ export const calculateRemainingTime = (expirationTime) => {
   const remainingDuration = timeDuration - currentTime;
   return remainingDuration;
 };
+
+export const getCurrentUser = (users) => {
+    const userId = localStorage.getItem('ID');
+    return users.filter((user) => user.id === userId);
+};

@@ -31,17 +31,16 @@ const Home = () => {
                 flex='lg:flex-row'
                 image={healthcare.image}
                 title={healthcare.title}
-                FirstDescription={healthcare.description[0]}
-                secondDescription={healthcare.description[1]}
-                id='123'
+                description={healthcare.description}
+                articleId='articleQq37z'
             />
             <TextImageSection
                 background='bg-white'
                 flex='lg:flex-row-reverse'
                 image={growth.image}
                 title={growth.title}
-                FirstDescription={growth.description[0]}
-                secondDescription={growth.description[1]}
+                description={growth.description}
+                articleId='articleQz07a'
             />
             <GetStarted patientsHandler={goToSignup} companiesHandler={goToSignupCompany} />
         </>

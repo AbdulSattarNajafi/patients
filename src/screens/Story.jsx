@@ -20,8 +20,8 @@ const Story = () => {
                 flex='lg:flex-row'
                 image={healthcare.image}
                 title={healthcare.title}
-                FirstDescription={healthcare.description[0]}
-                secondDescription={healthcare.description[1]}
+                description={healthcare.description}
+                articleId='articleRS32Hk'
             />
         </>
     );

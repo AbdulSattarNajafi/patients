@@ -2,14 +2,16 @@ import Login from '../screens/Login';
 import SignUp from '../screens/SignUp';
 import SignUpCompany from '../screens/SignUpCompany';
 
-import Home from '../screens/Home';
 import Companies from '../screens/Companies';
 import Patients from '../screens/Patients';
 import Story from '../screens/Story';
 import Contact from '../screens/Contact';
 
 import Settings from '../screens/Settings';
-import ReadeMore from '../screens/ReadeMore';
+import HomeReadeMore from '../screens/HomeReadeMore';
+import CompaniesReadMore from '../screens/CompaniesReadMore';
+import PatientsReadMore from '../screens/PatientsReadMore';
+import StoryReadMore from '../screens/StoryReadMore';
 
 export const authRoutes = [
     {
@@ -36,18 +38,28 @@ export const requireAuthRoutes = [
         component: Settings,
     },
     {
-        path: 'home/:id',
+        path: '/:articleId',
         name: 'ReadMode',
-        component: ReadeMore,
+        component: HomeReadeMore,
+    },
+    {
+        path: 'companies/:articleId',
+        name: 'CompaniesReadMore',
+        component: CompaniesReadMore,
+    },
+    {
+        path: 'patients/:articleId',
+        name: 'PatientsReadMore',
+        component: PatientsReadMore,
+    },
+    {
+        path: 'story/:articleId',
+        name: 'StoryReadMore',
+        component: StoryReadMore,
     },
 ];
 
 export const routes = [
-    {
-        path: 'home',
-        name: 'Home',
-        component: Home,
-    },
     {
         path: 'companies',
         name: 'Companies',

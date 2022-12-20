@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 
 const NotFound = () => {
     const navigate = useNavigate();
-    const gotToHomePage = () => navigate('/home', { replace: true });
+    const gotToHomePage = () => navigate('/', { replace: true });
 
     return (
         <div className='flex flex-col py-8 px-4 items-center justify-center min-h-screen'>
