@@ -1,56 +1,98 @@
-import React, { useState, useRef } from 'react';
+import React, { useState } from 'react';
 
-import { useAuth } from '../hooks';
+import { registerPage } from '../constants';
+import { useAuth, useCreateUser } from '../hooks';
 import LoginRegister from '../components/LoginRegister';
 import Input from '../components/Input';
 import Select from '../components/Select';
-import SignUpBg from './../assets/images/signup-bg.png';
-
-const title = 'Sign Up as Influencer';
-const description =
-    'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Proin convallis gravida condimentum.';
-const options = [
-    { label: 'Instagram', value: 'instagram' },
-    { label: 'Youtube', value: 'youtube' },
-    { label: 'Blog', value: 'blog' },
-    { label: 'Website', value: 'website' },
-];
 
 const SignUp = () => {
+    const { image, title, description, options } = registerPage;
     const [isLoading, setIsLoading] = useState(false);
-    const authCtx = useAuth();
+    const { createUser } = useCreateUser();
 
-    const firstNameRef = useRef();
-    const lastNameRef = useRef();
-    const userNameRef = useRef();
-    const emailRef = useRef();
-    const passwordRef = useRef();
-    const descriptionRef = useRef();
+    const [register, setRegister] = useState({
+        firstName: '',
+        lastName: '',
+        userName: '',
+        email: '',
+        password: '',
+        affiliate: '',
+        description: '',
+    });
+    const [error, setError] = useState({});
+    const [successMessage, setSuccessMessage] = useState(null);
+    const [errorMessage, setErrorMessage] = useState(null);
 
-    const [afiliateValue, SetAfiliateValue] = useState('instagram');
+    const inputHandler = (e) => {
+        const { name, value } = e.target;
+        const updatedFormValues = { ...register, [name]: value };
+        setRegister(updatedFormValues);
+        setError(validate(updatedFormValues));
+    };
+
+    const validate = (formValues) => {
+        const errors = {};
+        const validName = /^[a-zA-Z ]+$/;
+        const validEmail =
+            /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+
+        if (!formValues.firstName) {
+            errors.firstName = 'Name is required';
+        } else if (!validName.test(formValues.firstName) || formValues.firstName.length < 4) {
+            errors.firstName = 'Invalid Name';
+        }
+
+        if (!formValues.lastName) {
+            errors.lastName = 'Last name is required';
+        } else if (!validName.test(formValues.lastName) || formValues.lastName.length < 4) {
+            errors.lastName = 'Invalid last name';
+        }
+        if (!formValues.userName) {
+            errors.userName = 'User Name is required';
+        } else if (!validName.test(formValues.userName) || formValues.userName.length < 4) {
+            errors.userName = 'Invalid user name';
+        }
+        if (!formValues.email) {
+            errors.email = 'Email is rquired';
+        } else if (!formValues.email.match(validEmail)) {
+            errors.email = 'Invalid email';
+        }
+        if (!formValues.password) {
+            errors.password = 'Password is tequired';
+        } else if (formValues.password.length < 7) {
+            errors.password = 'Password must be at least 7 characters';
+        }
+
+        if (!formValues.affiliate) {
+            errors.affiliate = 'Please select an Affiliate user name';
+        }
+
+        return errors;
+    };
 
     const submitHandler = (e) => {
         e.preventDefault();
 
-        const enteredFirstName = firstNameRef.current.value;
-        const enteredLastName = lastNameRef.current.value;
-        const enteredUserName = userNameRef.current.value;
-        const enteredEmail = emailRef.current.value;
-        const enteredPassword = passwordRef.current.value;
-        const enteredDescription = descriptionRef.current.value;
+        setError(validate(register));
 
-        // Validation
+        // If any error prevent from Submiting
+        if (Object.keys(error).length > 0) {
+            return;
+        }
 
         setIsLoading(true);
+        setSuccessMessage(null);
+        setErrorMessage(null);
         // API Request
         fetch(
             'https://identitytoolkit.googleapis.com/v1/accounts:signUp?key=AIzaSyCscwFPlTqmbK8LUajTdk8ZzRVrbxq58ak',
             {
                 method: 'POST',
                 body: JSON.stringify({
-                    email: enteredEmail,
-                    password: enteredPassword,
-                    displayName: enteredUserName,
+                    email: register.email,
+                    password: register.password,
+                    displayName: register.userName,
                     returnSecureToken: true,
                 }),
                 headers: {
@@ -65,22 +107,23 @@ const SignUp = () => {
                 } else {
                     return res.json().then((data) => {
                         // Show error
-                        alert(data.error.message);
-                        throw new Error(data.error.message);
+                        throw new Error('Something went wrong!');
                     });
                 }
             })
             .then((data) => {
-                console.log(data);
+                setSuccessMessage('success');
+                console.log(data.localId);
+                createUser({ ...register, id: data.localId, password: '', image:'' });
             })
             .catch((err) => {
-                alert(err.message);
+                setErrorMessage(err.message);
             });
     };
 
     return (
         <LoginRegister
-            image={SignUpBg}
+            image={image}
             title={title}
             description={description}
             page='sign-up'
@@ -89,74 +132,96 @@ const SignUp = () => {
             <div className='flex flex-col items-center sm:flex-row sm:space-x-4'>
                 <Input
                     id='first-name'
-                    label='First Name'
+                    name='firstName'
+                    label='First Names'
                     type='text'
                     placeholder='First Name'
                     required={true}
-                    inputRef={firstNameRef}
+                    onChange={inputHandler}
+                    isValid={!!error.firstName}
+                    value={register.firstName}
                 />
                 <Input
                     id='last-name'
+                    name='lastName'
                     label='Last Name'
                     type='text'
                     placeholder='Last Name'
                     required={true}
-                    inputRef={lastNameRef}
+                    onChange={inputHandler}
+                    isValid={error.lastName}
+                    value={register.lastName}
                 />
             </div>
             <div className='flex flex-col items-center sm:flex-row sm:space-x-4'>
                 <Input
                     id='user-name'
+                    name='userName'
                     label='User Name'
                     type='text'
                     placeholder='User Name'
                     required={true}
-                    inputRef={userNameRef}
+                    onChange={inputHandler}
+                    isValid={error.userName}
+                    value={register.userName}
                 />
                 <Input
                     id='email'
+                    name='email'
                     label='Email'
-                    type='email'
+                    type='text'
                     placeholder='Email'
                     required={true}
-                    inputRef={emailRef}
+                    onChange={inputHandler}
+                    isValid={error.email}
+                    value={register.email}
                 />
             </div>
             <Input
                 id='password'
+                name='password'
                 label='Password'
                 type='password'
                 required={true}
                 placeholder='Password'
-                inputRef={passwordRef}
+                onChange={inputHandler}
+                isValid={error.password}
+                value={register.password}
             />
 
             <div className='flex flex-col sm:flex-row sm:items-end sm:space-x-4'>
                 <div className='w-full sm:w-1/3'>
                     <Select
                         id='affiliate'
+                        name='affiliate'
                         label='Affiliate Username'
                         required={true}
                         options={options}
-                        onChange={(e) => SetAfiliateValue(e.target.value)}
+                        onChange={inputHandler}
+                        isValid={error.affiliate}
+                        value={register.affiliate}
                     />
                 </div>
                 <div className='w-full sm:w-2/3'>
                     <Input
                         id='afiliate'
+                        name='description'
                         required={false}
                         label=''
                         type='text'
                         placeholder='Type Here'
-                        inputRef={descriptionRef}
+                        onChange={inputHandler}
+                        value={register.description}
                     />
                 </div>
             </div>
 
-            <div className='pt-6'>
+            <div className='pt-6 flex justify-between items-center'>
                 <button type='submit' className='btn btn-primary'>
                     {isLoading ? 'Loading...' : 'Sign Up now'}
                 </button>
+                {!isLoading && !successMessage && <p className='text-red-600'>{errorMessage}</p>}
+                {!isLoading && !errorMessage && <p className='text-green-600'>{successMessage}</p>}
             </div>
         </LoginRegister>
     );

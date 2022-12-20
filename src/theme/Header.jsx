@@ -7,12 +7,15 @@ import Settings from './../assets/images/settings.svg';
 import Password from './../assets/images/change-password.svg';
 import ArrowIcon from './../assets/images/arrow-down.svg';
 import { navLinks } from '../constants';
-import { useWindowDimensions, useAuth } from '../hooks';
+import { useWindowDimensions, useAuth, useGetUser } from '../hooks';
 
 const Header = () => {
     const authCtx = useAuth();
     const [showMenu, setShowMenu] = useState(false);
     const screenWidth = useWindowDimensions();
+    const { users } = useGetUser();
+    const userId = localStorage.getItem('ID');
+    const [currentUser] = users.filter((user) => user.id === userId);
 
     const showMenuHandler = () => {
         setShowMenu((prevState) => !prevState);
@@ -47,10 +50,11 @@ const Header = () => {
                             return (
                                 <li key={link.id}>
                                     <NavLink
+                                        end={link.end}
                                         className={({ isActive }) =>
                                             isActive ? activeClassName : defaulClassName
                                         }
-                                        to={`/${link.linkTo}`}
+                                        to={`${link.linkTo}`}
                                     >
                                         {link.text}
                                     </NavLink>
@@ -88,9 +92,9 @@ const Header = () => {
                                             </div>
                                             <div className='flex flex-col justify-center'>
                                                 <p className='text-xs font-semibold'>
-                                                    Example@example.com
+                                                    {currentUser?.email}
                                                 </p>
-                                                <p className='text-xs'>Use Name</p>
+                                                <p className='text-xs'>{currentUser?.userName}</p>
                                             </div>
                                         </li>
                                         <li className='border-t border-t-gray-200 pt-4 px-2'>
