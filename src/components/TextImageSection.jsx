@@ -2,20 +2,12 @@ import React from "react";
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../hooks';
 
-const TextImageSection = ({
-    background,
-    flex,
-    image,
-    title,
-    FirstDescription,
-    secondDescription,
-    id,
-}) => {
+const TextImageSection = ({ background, flex, image, title, description, articleId }) => {
     const authCtx = useAuth();
     const navigate = useNavigate();
     const readMoreHandler = () => {
-        if (id) {
-            navigate(`${id}`);
+        if (articleId) {
+            navigate(`${articleId}`);
         }
     };
 
@@ -29,9 +21,12 @@ const TextImageSection = ({
                     <h3 className='text-primaryBlue font-bold text-3xl md:text-4xl lg:leading-[60px] lg:text-5xl'>
                         {title}
                     </h3>
-                    <div className='mt-6 mb-12 lg:mb-16'>
-                        <p>{FirstDescription}</p>
-                        <p className='mt-4'>{secondDescription}</p>
+                    <div className='mt-6 mb-8 lg:mb-16'>
+                        {description.map((desc, i) => (
+                            <p key={i} className='mb-4'>
+                                {desc}
+                            </p>
+                        ))}
                     </div>
                     <div className=''>
                         <button

@@ -26,16 +26,16 @@ const Patients = () => {
                 flex='lg:flex-row'
                 image={healthcare.image}
                 title={healthcare.title}
-                FirstDescription={healthcare.description[0]}
-                secondDescription={healthcare.description[1]}
+                description={healthcare.description}
+                articleId='article45Qj'
             />
             <TextImageSection
                 background='bg-white'
                 flex='lg:flex-row-reverse'
                 image={growth.image}
                 title={growth.title}
-                FirstDescription={growth.description[0]}
-                secondDescription={growth.description[1]}
+                description={growth.description}
+                articleId='article03Qs'
             />
             <Discover
                 title='Discover the client Influence Advantage Today'
