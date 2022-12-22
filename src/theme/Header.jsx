@@ -219,10 +219,11 @@ const Header = () => {
                             <li key={link.id} className='mb-1'>
                                 <NavLink
                                     onClick={() => setShowMenu(false)}
+                                    end={link.end}
                                     className={({ isActive }) =>
                                         isActive ? mobileNavLinkActive : mobileNavLink
                                     }
-                                    to={`/${link.linkTo}`}
+                                    to={`${link.linkTo}`}
                                 >
                                     {link.text}
                                 </NavLink>
