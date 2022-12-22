@@ -1,7 +1,6 @@
 import { createContext, useState, useEffect } from 'react';
 
 const GetUsersConetx = createContext({
-    getUser: () => {},
     users: [],
 });
 
@@ -48,7 +47,6 @@ export const GetUserProvider = ({ children }) => {
     }, []);
 
     const getUserValue = {
-        getUser: getUserHandler,
         users: user,
     };
     return <GetUsersConetx.Provider value={getUserValue}>{children}</GetUsersConetx.Provider>;
