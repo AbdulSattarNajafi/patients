@@ -2,7 +2,7 @@ import React, { useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 import { loginPage } from '../constants';
-import { useAuth, useGetUser } from '../hooks';
+import { useAuth } from '../hooks';
 import LoginRegister from '../components/LoginRegister';
 import Input from '../components/Input';
 
@@ -15,7 +15,6 @@ const Login = () => {
 
     const navigate = useNavigate();
     const authCtx = useAuth();
-    const { getUser } = useGetUser();
 
     const loginChangeHandler = (e) => {
         const { name, value } = e.target;
@@ -83,7 +82,6 @@ const Login = () => {
                 const expirationTime = new Date(new Date().getTime() + +data.expiresIn * 1000);
                 authCtx.login(data.idToken, expirationTime.toISOString(), data.localId);
                 navigate('/', { replace: true });
-                getUser();
             })
             .catch((error) => {
                 const errorText =
