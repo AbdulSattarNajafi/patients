@@ -38,7 +38,7 @@ export const GetUserProvider = ({ children }) => {
                 setUser(userData);
             })
             .catch((error) => {
-                console.log(error);
+                // console.log(error);
             });
     };
 
