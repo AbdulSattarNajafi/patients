@@ -1,6 +1,5 @@
-import React from "react";
-import ReactDOM from "react-dom/client";
-import { BrowserRouter } from "react-router-dom";
+import React from 'react';
+import ReactDOM from 'react-dom/client';
 import { AuthContextProvider } from './store/auth-context';
 import { CreateUsersContextProvider } from './store/create-users-context';
 import { GetUserProvider } from './store/getusers-context';
@@ -9,14 +8,12 @@ import './index.css';
 
 ReactDOM.createRoot(document.getElementById('root')).render(
     <React.StrictMode>
-        <BrowserRouter>
-            <AuthContextProvider>
-                <CreateUsersContextProvider>
-                    <GetUserProvider>
-                        <App />
-                    </GetUserProvider>
-                </CreateUsersContextProvider>
-            </AuthContextProvider>
-        </BrowserRouter>
+        <AuthContextProvider>
+            <CreateUsersContextProvider>
+                <GetUserProvider>
+                    <App />
+                </GetUserProvider>
+            </CreateUsersContextProvider>
+        </AuthContextProvider>
     </React.StrictMode>
 );
