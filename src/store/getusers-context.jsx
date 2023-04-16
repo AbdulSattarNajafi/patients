@@ -1,13 +1,13 @@
 import { createContext, useState, useEffect } from 'react';
 
-const GetUsersConetx = createContext({
+const GetUsersContext = createContext({
     users: [],
 });
 
 export const GetUserProvider = ({ children }) => {
     const [user, setUser] = useState([]);
 
-    const getUserHandler = () => {
+    const getUserHandler = async () => {
         fetch('https://patients-ca58c-default-rtdb.asia-southeast1.firebasedatabase.app/users.json')
             .then((res) => {
                 if (res.ok) {
@@ -49,7 +49,7 @@ export const GetUserProvider = ({ children }) => {
     const getUserValue = {
         users: user,
     };
-    return <GetUsersConetx.Provider value={getUserValue}>{children}</GetUsersConetx.Provider>;
+    return <GetUsersContext.Provider value={getUserValue}>{children}</GetUsersContext.Provider>;
 };
 
-export default GetUsersConetx;
+export default GetUsersContext;
