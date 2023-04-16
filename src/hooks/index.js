@@ -1,8 +1,8 @@
-import React, { useState, useEffect, useContext } from 'react';
+import { useState, useEffect, useContext } from 'react';
 
 import AuthContext from '../store/auth-context';
 import CreateUsersContext from '../store/create-users-context';
-import GetUsersConetx from '../store/getusers-context';
+import GetUsersContext from '../store/getusers-context';
 
 function getWindowDimensions() {
     const { innerWidth: width, innerHeight: height } = window;
@@ -39,5 +39,5 @@ export const useCreateUser = () => {
 
 // Get users
 export const useGetUser = () => {
-    return useContext(GetUsersConetx);
+    return useContext(GetUsersContext);
 };

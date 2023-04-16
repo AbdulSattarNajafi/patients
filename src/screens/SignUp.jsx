@@ -1,124 +1,148 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 import { registerPage } from '../constants';
-import { useAuth, useCreateUser } from '../hooks';
+import { useCreateUser } from '../hooks';
 import LoginRegister from '../components/LoginRegister';
 import Input from '../components/Input';
 import Select from '../components/Select';
 
+import useValidate from './../hooks/useValidate';
+import { validateEmail } from '../utils';
+
 const SignUp = () => {
+    const { createUser } = useCreateUser();
+    const navigate = useNavigate();
+
     const { image, title, description, options } = registerPage;
     const [isLoading, setIsLoading] = useState(false);
-    const { createUser } = useCreateUser();
-
-    const [register, setRegister] = useState({
-        firstName: '',
-        lastName: '',
-        userName: '',
-        email: '',
-        password: '',
-        affiliate: '',
-        description: '',
-    });
-    const [error, setError] = useState({});
     const [successMessage, setSuccessMessage] = useState(null);
     const [errorMessage, setErrorMessage] = useState(null);
 
-    const inputHandler = (e) => {
-        const { name, value } = e.target;
-        const updatedFormValues = { ...register, [name]: value };
-        setRegister(updatedFormValues);
-        setError(validate(updatedFormValues));
-    };
+    const {
+        value: enteredFirstName,
+        isValid: isEnteredFirstNameValid,
+        hasError: enteredFirstNameHasError,
+        onChange: firstNameChange,
+        onBlur: firstNameBlur,
+        reset: firstNameResetHandler,
+    } = useValidate((value) => value.trim().length > 3);
 
-    const validate = (formValues) => {
-        const errors = {};
-        const validName = /^[a-zA-Z ]+$/;
-        const validEmail =
-            /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+    const {
+        value: enteredLastName,
+        isValid: isEnteredLastNameValid,
+        hasError: enteredLastNameHasError,
+        onChange: lastNameChange,
+        onBlur: lastNameBlur,
+        reset: lastNameResetHandler,
+    } = useValidate((value) => value.trim().length > 3);
 
-        if (!formValues.firstName) {
-            errors.firstName = 'Name is required';
-        } else if (!validName.test(formValues.firstName) || formValues.firstName.length < 4) {
-            errors.firstName = 'Invalid Name';
-        }
+    const {
+        value: enteredUserName,
+        isValid: isEnteredUserNameValid,
+        hasError: enteredUserNameHasError,
+        onChange: userNameChange,
+        onBlur: userNameBlur,
+        reset: userNameResetHandler,
+    } = useValidate((value) => value.trim().length > 3);
 
-        if (!formValues.lastName) {
-            errors.lastName = 'Last name is required';
-        } else if (!validName.test(formValues.lastName) || formValues.lastName.length < 4) {
-            errors.lastName = 'Invalid last name';
-        }
-        if (!formValues.userName) {
-            errors.userName = 'User Name is required';
-        } else if (!validName.test(formValues.userName) || formValues.userName.length < 4) {
-            errors.userName = 'Invalid user name';
-        }
-        if (!formValues.email) {
-            errors.email = 'Email is rquired';
-        } else if (!formValues.email.match(validEmail)) {
-            errors.email = 'Invalid email';
-        }
-        if (!formValues.password) {
-            errors.password = 'Password is tequired';
-        } else if (formValues.password.length < 7) {
-            errors.password = 'Password must be at least 7 characters';
-        }
+    const {
+        value: enteredEmail,
+        isValid: isEnteredEmailValid,
+        hasError: enteredEmailHasError,
+        onChange: emailChange,
+        onBlur: emailBlur,
+        reset: emailResetHandler,
+    } = useValidate(validateEmail);
 
-        if (!formValues.affiliate) {
-            errors.affiliate = 'Please select an Affiliate user name';
-        }
+    const {
+        value: enteredPassword,
+        isValid: isPasswordlValid,
+        hasError: passwordHasError,
+        onChange: passwordChange,
+        onBlur: passwordBlurHandler,
+        reset: passwordResetHandler,
+    } = useValidate((value) => value.trim().length > 6);
 
-        return errors;
-    };
+    const {
+        value: selectedAffiliate,
+        isValid: isAffiliatelValid,
+        hasError: affiliateHasError,
+        onChange: affiliateChange,
+        onBlur: affiliateBlurHandler,
+        reset: affiliateResetHandler,
+    } = useValidate((value) => value.trim() !== '');
 
-    const submitHandler = (e) => {
+    const { value: enteredAffiliateName, onChange: affiliateNameChange } = useValidate(() => true);
+
+    let isFormValid = false;
+
+    if (
+        isEnteredFirstNameValid &&
+        isEnteredLastNameValid &&
+        isEnteredUserNameValid &&
+        isEnteredEmailValid &&
+        isPasswordlValid &&
+        isAffiliatelValid
+    ) {
+        isFormValid = true;
+    }
+
+    const submitHandler = async (e) => {
         e.preventDefault();
 
-        setError(validate(register));
-
         // If any error prevent from Submiting
-        if (Object.keys(error).length > 0) {
+        if (!isFormValid) {
             return;
         }
 
         setIsLoading(true);
         setSuccessMessage(null);
         setErrorMessage(null);
-        // API Request
-        fetch(
-            'https://identitytoolkit.googleapis.com/v1/accounts:signUp?key=AIzaSyCscwFPlTqmbK8LUajTdk8ZzRVrbxq58ak',
-            {
-                method: 'POST',
-                body: JSON.stringify({
-                    email: register.email,
-                    password: register.password,
-                    displayName: register.userName,
-                    returnSecureToken: true,
-                }),
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-            }
-        )
-            .then((res) => {
-                setIsLoading(false);
-                if (res.ok) {
-                    return res.json();
-                } else {
-                    return res.json().then((data) => {
-                        // Show error
-                        throw new Error('Something went wrong!');
-                    });
+
+        try {
+            const response = await fetch(
+                'https://identitytoolkit.googleapis.com/v1/accounts:signUp?key=AIzaSyCscwFPlTqmbK8LUajTdk8ZzRVrbxq58ak',
+                {
+                    method: 'POST',
+                    body: JSON.stringify({
+                        email: enteredEmail,
+                        password: enteredPassword,
+                        displayName: enteredUserName,
+                        returnSecureToken: true,
+                    }),
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
                 }
-            })
-            .then((data) => {
-                setSuccessMessage('success');
-                console.log(data.localId);
-                createUser({ ...register, id: data.localId, password: '', image:'' });
-            })
-            .catch((err) => {
-                setErrorMessage(err.message);
+            );
+
+            if (!response.ok) {
+                const data = await response.json();
+
+                throw new Error(data.error.message);
+            }
+
+            const data = await response.json();
+            setSuccessMessage('success');
+
+            createUser({
+                affiliate: selectedAffiliate,
+                description: enteredAffiliateName,
+                email: enteredEmail,
+                firstName: enteredFirstName,
+                lasstName: enteredLastName,
+                userName: enteredUserName,
+                password: enteredPassword,
+                id: data.localId,
+                image: '',
             });
+            navigate('/login', { replace: true });
+        } catch (err) {
+            setErrorMessage(err.message);
+        }
+
+        setIsLoading(false);
     };
 
     return (
@@ -137,9 +161,10 @@ const SignUp = () => {
                     type='text'
                     placeholder='First Name'
                     required={true}
-                    onChange={inputHandler}
-                    isValid={!!error.firstName}
-                    value={register.firstName}
+                    onChange={firstNameChange}
+                    onBlur={firstNameBlur}
+                    isValid={enteredFirstNameHasError}
+                    value={enteredFirstName}
                 />
                 <Input
                     id='last-name'
@@ -148,9 +173,10 @@ const SignUp = () => {
                     type='text'
                     placeholder='Last Name'
                     required={true}
-                    onChange={inputHandler}
-                    isValid={error.lastName}
-                    value={register.lastName}
+                    onChange={lastNameChange}
+                    onBlur={lastNameBlur}
+                    isValid={enteredLastNameHasError}
+                    value={enteredLastName}
                 />
             </div>
             <div className='flex flex-col items-center sm:flex-row sm:space-x-4'>
@@ -161,9 +187,10 @@ const SignUp = () => {
                     type='text'
                     placeholder='User Name'
                     required={true}
-                    onChange={inputHandler}
-                    isValid={error.userName}
-                    value={register.userName}
+                    onChange={userNameChange}
+                    onBlur={userNameBlur}
+                    isValid={enteredUserNameHasError}
+                    value={enteredUserName}
                 />
                 <Input
                     id='email'
@@ -172,9 +199,10 @@ const SignUp = () => {
                     type='text'
                     placeholder='Email'
                     required={true}
-                    onChange={inputHandler}
-                    isValid={error.email}
-                    value={register.email}
+                    onChange={emailChange}
+                    onBlur={emailBlur}
+                    isValid={enteredEmailHasError}
+                    value={enteredEmail}
                 />
             </div>
             <Input
@@ -184,25 +212,27 @@ const SignUp = () => {
                 type='password'
                 required={true}
                 placeholder='Password'
-                onChange={inputHandler}
-                isValid={error.password}
-                value={register.password}
+                onChange={passwordChange}
+                onBlur={passwordBlurHandler}
+                isValid={passwordHasError}
+                value={enteredPassword}
             />
 
             <div className='flex flex-col sm:flex-row sm:items-end sm:space-x-4'>
-                <div className='w-full sm:w-1/3'>
+                <div className='w-full sm:w-2/5'>
                     <Select
                         id='affiliate'
                         name='affiliate'
                         label='Affiliate Username'
                         required={true}
                         options={options}
-                        onChange={inputHandler}
-                        isValid={error.affiliate}
-                        value={register.affiliate}
+                        onChange={affiliateChange}
+                        onBlur={affiliateBlurHandler}
+                        isValid={affiliateHasError}
+                        value={selectedAffiliate}
                     />
                 </div>
-                <div className='w-full sm:w-2/3'>
+                <div className='w-full sm:w-3/5'>
                     <Input
                         id='afiliate'
                         name='description'
@@ -210,8 +240,8 @@ const SignUp = () => {
                         label=''
                         type='text'
                         placeholder='Type Here'
-                        onChange={inputHandler}
-                        value={register.description}
+                        onChange={affiliateNameChange}
+                        value={enteredAffiliateName}
                     />
                 </div>
             </div>

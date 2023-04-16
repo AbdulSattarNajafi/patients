@@ -5,95 +5,108 @@ import { loginPage } from '../constants';
 import { useAuth } from '../hooks';
 import LoginRegister from '../components/LoginRegister';
 import Input from '../components/Input';
+import useValidate from '../hooks/useValidate';
+import { validateEmail } from '../utils';
 
 const Login = () => {
-    const { image, description } = loginPage;
-    const [isLoading, setIsLoading] = useState(false);
-    const [loginInputs, setLoginInputs] = useState({ email: '', password: '' });
-    const [inputError, setInputError] = useState({});
-    const [errorMessage, setErrorMessage] = useState(null);
-
     const navigate = useNavigate();
     const authCtx = useAuth();
+    const { image, description } = loginPage;
+    const [isLoading, setIsLoading] = useState(false);
+    const [errors, setErrors] = useState({ email: '', password: '' });
 
-    const loginChangeHandler = (e) => {
-        const { name, value } = e.target;
-        const updatedValues = { ...loginInputs, [name]: value };
-        setLoginInputs(updatedValues);
-        setInputError(validateForm(updatedValues));
-    };
+    const {
+        value: enteredEmail,
+        isValid: isEmailValid,
+        hasError: emailHasError,
+        onChange: emailChange,
+        onBlur: emailBlurHandler,
+        reset: emailResetHandler,
+    } = useValidate(validateEmail);
 
-    const validateForm = (formValues) => {
-        const errors = {};
-        const validEmail =
-            /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+    const {
+        value: enteredPassword,
+        isValid: isPasswordlValid,
+        hasError: passwordHasError,
+        onChange: passwordChange,
+        onBlur: passwordBlurHandler,
+        reset: passwordResetHandler,
+    } = useValidate((value) => value.trim().length > 6);
 
-        if (!formValues.email) {
-            errors.email = 'Email is required';
-        } else if (!formValues.email.match(validEmail)) {
-            errors.email = 'Invalid email!';
+    const responseValidation = (responseMessage) => {
+        if (responseMessage === 'EMAIL_NOT_FOUND') {
+            setErrors((prev) => {
+                return { ...prev, email: 'Email not Found' };
+            });
         }
 
-        if (!formValues.password) {
-            errors.password = 'Passowrd is required';
-        } else if (formValues.password.length < 7) {
-            errors.password = 'Password must be at least 7 characters';
+        if (responseMessage === 'INVALID_PASSWORD') {
+            setErrors((prev) => {
+                return { ...prev, password: 'Invalid Password' };
+            });
         }
-
-        return errors;
     };
 
-    const submitHandler = (e) => {
+    const emailChangeHandler = (e) => {
+        emailChange(e);
+        setErrors((prev) => {
+            return { ...prev, email: '' };
+        });
+    };
+
+    const passwordChangeHandler = (e) => {
+        passwordChange(e);
+        setErrors((prev) => {
+            return { ...prev, password: '' };
+        });
+    };
+
+    let isFormValid = false;
+    if (isEmailValid && isPasswordlValid) {
+        isFormValid = true;
+    }
+
+    const submitHandler = async (e) => {
         e.preventDefault();
 
-        setInputError(validateForm(loginInputs));
-        // Validation
-        if (Object.keys(inputError).length > 0) {
-            return;
-        }
+        // Form Validation
+        if (!isFormValid) return;
 
-        // API Request
         setIsLoading(true);
-        fetch(
-            'https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=AIzaSyCscwFPlTqmbK8LUajTdk8ZzRVrbxq58ak',
-            {
-                method: 'POST',
-                body: JSON.stringify({
-                    email: loginInputs.email,
-                    password: loginInputs.password,
-                    returnSecureToken: true,
-                }),
-                headers: {
-                    'Content-Type': 'application/json',
-                },
+
+        try {
+            const response = await fetch(
+                'https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=AIzaSyCscwFPlTqmbK8LUajTdk8ZzRVrbxq58ak',
+                {
+                    method: 'POST',
+                    body: JSON.stringify({
+                        email: enteredEmail,
+                        password: enteredPassword,
+                        returnSecureToken: true,
+                    }),
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                }
+            );
+            if (!response.ok) {
+                const data = await response.json();
+                throw new Error(data.error.message);
             }
-        )
-            .then((res) => {
-                setIsLoading(false);
-                if (res.ok) {
-                    return res.json();
-                } else {
-                    return res.json().then((data) => {
-                        throw new Error(data.error.message);
-                    });
-                }
-            })
-            .then((data) => {
-                const expirationTime = new Date(new Date().getTime() + +data.expiresIn * 1000);
-                authCtx.login(data.idToken, expirationTime.toISOString(), data.localId);
-                navigate('/', { replace: true });
-            })
-            .catch((error) => {
-                const errorText =
-                    error.message === 'INVALID_PASSWORD' ? 'Wrong Password' : 'Email not found';
-                if (error.message === 'INVALID_PASSWORD') {
-                    setInputError({ ...inputError, password: 'Wrong Password' });
-                }
-                if (error.message === 'EMAIL_NOT_FOUND') {
-                    setInputError({ ...inputError, email: 'Email not found' });
-                }
-                setErrorMessage(errorText);
-            });
+
+            const data = await response.json();
+
+            const expirationTime = new Date(new Date().getTime() + +data.expiresIn * 1000);
+
+            authCtx.login(data.idToken, expirationTime.toISOString(), data.localId);
+
+            emailResetHandler();
+            passwordResetHandler();
+            navigate('/', { replace: true });
+        } catch (err) {
+            responseValidation(err.message);
+        }
+        setIsLoading(false);
     };
 
     return (
@@ -111,9 +124,13 @@ const Login = () => {
                 type='text'
                 required={true}
                 placeholder='Email'
-                isValid={inputError.email}
-                onChange={loginChangeHandler}
-                value={loginInputs.email}
+                isValid={emailHasError}
+                onChange={emailChangeHandler}
+                onBlur={emailBlurHandler}
+                value={enteredEmail}
+                errorMessage={
+                    emailHasError ? 'Please enter a vaild email1' : errors.email ? errors.email : ''
+                }
             />
             <Input
                 id='password'
@@ -122,22 +139,26 @@ const Login = () => {
                 type='password'
                 required={true}
                 placeholder='Password'
-                isValid={inputError.password}
-                onChange={loginChangeHandler}
-                value={loginInputs.password}
+                isValid={passwordHasError}
+                onChange={passwordChangeHandler}
+                onBlur={passwordBlurHandler}
+                value={enteredPassword}
+                errorMessage={
+                    passwordHasError
+                        ? 'Password must be at least 7 characters'
+                        : errors.password
+                        ? errors.password
+                        : ''
+                }
             />
 
-            <div className='pt-6 flex items-center justify-between'>
+            <div className='pt-6'>
                 <button type='submit' className='btn btn-primary'>
                     {isLoading ? 'Logging...' : 'Login now'}
                 </button>
-                <p className='text-red-400'>{errorMessage}</p>
             </div>
         </LoginRegister>
     );
 };
 
 export default Login;
-
-// localId = DUQu2sqsR2Qcxm3DsLbYFWAm9Bj2;
-// localId = DUQu2sqsR2Qcxm3DsLbYFWAm9Bj2;

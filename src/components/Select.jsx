@@ -1,8 +1,19 @@
-import React from "react";
+import React from 'react';
 
-const Select = ({ id, label, required, options, onChange, isValid, name, value }) => {
+const Select = ({
+    id,
+    label,
+    required,
+    options,
+    onChange,
+    onBlur,
+    isValid,
+    name,
+    value,
+    errorMessage,
+}) => {
     return (
-        <div className='w-full flex flex-col mb-6'>
+        <div className='w-full flex flex-col mb-2'>
             <label
                 htmlFor={id}
                 className='block text-base text-primaryBlue mb-2 md:text-xl lg:text-[20px] lg:leading-7'
@@ -17,6 +28,7 @@ const Select = ({ id, label, required, options, onChange, isValid, name, value }
                 id={id}
                 name={name}
                 onChange={onChange}
+                onBlur={onBlur}
                 value={value}
             >
                 {options.map((item, i) => {
@@ -27,6 +39,7 @@ const Select = ({ id, label, required, options, onChange, isValid, name, value }
                     );
                 })}
             </select>
+            <p className='text-sm h-5 text-red-400 m-1'>{errorMessage}</p>
         </div>
     );
 };
